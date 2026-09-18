@@ -2,6 +2,8 @@
 
 RelaySeal is a GenLayer intelligent contract for transferring operational authority only after the outgoing operator commits a complete handover, consensus verifies the exact evidence, the incoming operator acknowledges the exact digest, and the service controller activates the transfer.
 
+Live frontend: [relayseal.vercel.app](https://relayseal.vercel.app) · Studionet contract: `0x34e20DaAfcb0737DC34c70267B5bb06AE7BC1F31`
+
 The core rule is simple: **evidence informs; on-chain policy authorizes**. A Markdown file can describe deployments, incidents, risks and rollback steps, but it can never appoint an operator or grant execution rights.
 
 ## Authority model
@@ -43,8 +45,8 @@ npm run build
 python -m pytest -q
 ```
 
-See [`docs/test-plan.md`](./docs/test-plan.md) for wallet roles, happy path, failure paths, conflict testing and state invariants.
+See [`docs/test-plan.md`](./docs/test-plan.md) for wallet roles, happy path, failure paths, conflict testing and state invariants. The [live Studionet evidence](./docs/LIVE_STUDIONET_EVIDENCE.md) records transaction hashes and canonical readbacks for the completed READY → ACCEPTED → ACTIVATED lifecycle, rejected evidence, authority checks, and replay guards.
 
 ## Status
 
-The codebase is deployment-ready but no contract address or live transaction evidence is claimed in this repository until an owner deploys it and the complete Studionet test matrix has finalized.
+The contract and frontend are deployed on GenLayer Studionet (`61999`) and Vercel respectively. On 2026-09-18, the production URL returned HTTP 200; its server API returned the deployed contract version and the live `ready-handover-mu6he9cq` record with `READY / ACTIVATED`, `incoming_accepted=true`, and `consumed=true`. The frontend JavaScript bundle contains the configured contract address. Browser-wallet signing through the production UI was not separately exercised; the documented write lifecycle used the two designated test wallets through the SDK.

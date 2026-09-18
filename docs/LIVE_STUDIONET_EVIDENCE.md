@@ -4,6 +4,8 @@ Network: GenLayer Studionet (`61999`)
 
 Contract: `0x34e20DaAfcb0737DC34c70267B5bb06AE7BC1F31`
 
+Frontend: [https://relayseal.vercel.app](https://relayseal.vercel.app)
+
 The two wallets below are test roles. No private keys are stored in this repository.
 
 - Controller and incoming operator: `0xeb57bc7125fa60d7482ce12058397369ab3581f8`
@@ -72,3 +74,7 @@ This run uses service `ready-service-mu6he9cq`, policy `ready-policy-mu6he9cq`, 
 | Controller attempts activation replay | `0x2c41d9ad2f04055550ee0ab6c2c2eefb671a98d0e0047ac6edd9fac9fd999505` | Revision remains 2; handover remains consumed and `ACTIVATED` |
 
 Final readback: active operator `0xeb57…81f8`, service revision `2`, verdict `READY`, status `ACTIVATED`, `incoming_accepted=true`, and `consumed=true`. This verifies the complete successful lifecycle as well as wrong-role, stale-authority, and replay failure paths.
+
+## Production frontend verification
+
+On 2026-09-18, Vercel production deployment `dpl_9hrJ1BppbdMtzxyKVKgBZmHx9qeL` was aliased to `https://relayseal.vercel.app`. The production homepage returned HTTP `200`, and its JavaScript bundle included the deployed contract address. The production API returned `success: true` for `get_contract_version` (`RelaySeal`, `authority-bound-handover-v1`, version `1`) and for `get_handover?id=ready-handover-mu6he9cq` (`READY`, `ACTIVATED`, `incoming_accepted=true`, `consumed=true`). This verifies live readback through the frontend backend. A browser-wallet write through the production UI is not claimed; the above on-chain writes were executed with the designated test wallets via the SDK.
