@@ -52,6 +52,23 @@ The exact source was `eaglebooth/ForkRight@e3e09304f38ab42ca31478cb601a99238f813
 
 Final canonical state for this test service remains revision `1`, active operator `0x2da5…843f`, with the tested rejected handover unaccepted and unconsumed.
 
-## Remaining live test
+## Successful READY lifecycle and authority transfer
 
-The READY → incoming acceptance → controller activation → new-operator operation lifecycle requires a commit-pinned public Markdown handover containing all required operational fields. The prepared READY fixture is currently local only, so this lifecycle is not claimed as live-verified yet.
+This run uses service `ready-service-mu6he9cq`, policy `ready-policy-mu6he9cq`, and handover `ready-handover-mu6he9cq`. The source is the 944-byte commit-pinned fixture [`handover-ready.md`](https://raw.githubusercontent.com/eaglebooth/RelaySeal/de0ffa7d486e90ace7a2714e9813ea26878dee40/fixtures/handover-ready.md), with SHA-256 `1eccfb151455a0229189f9d3efbedda06516f3b04c6e606e8efa08c229bb50af`.
+
+| Scenario | Transaction | Verified outcome |
+| --- | --- | --- |
+| Register transfer-test service | `0xa8f6b093e971d65a4be9d6bae1951dc7729043ebd7f1fcf840067758203d8eae` | Controller and outgoing authority recorded at revision 1 |
+| Create transfer policy | `0x5f668823aae60df781ab8da66ad107ba4686479b5dd3d5bf5041f2fd2511040e` | Repository-bound policy created |
+| Outgoing approves exact policy digest | `0x6ddb946e6febd44ea52a7e070ddc93ef9568dac8f036a1367e2711d9eb109cd4` | Outgoing approval recorded |
+| Incoming approves exact policy digest | `0x5951f38a7023b16aff977ea4d7a97faefe7e8c6ff1c3941b10b47dd64d044514` | Dual approval seals policy |
+| Submit pinned READY fixture | `0x5cc3410b9030da0db0205506fe69d5a91921235cef3da24727e81191aeab143b` | URL, byte length, SHA-256 and nonce committed |
+| Decentralized assessment | `0x49176d69c92515033ca69b562bba5bc22b68e06cf57a69cbd3a2098ea4f5ab84` | `READY / AWAITING_ACCEPTANCE`; observed SHA-256 matches commitment |
+| Outgoing attempts incoming-only acceptance | `0xe221b10a231131285ae13984464fa55bd4eef8f2b9ae71153f981e9772889963` | No acceptance or state mutation |
+| Incoming accepts exact handover digest | `0xcf097dc4d26e40da7c407a9567adb1633ce27954c0b29b30e9e2d41e694b004f` | Handover becomes `ACCEPTED` |
+| Controller activates transfer | `0xb6ac6c34c181bcd97990516224f132b4342da2dd5a3e499e4a0a982d0678c1fc` | Handover becomes `ACTIVATED` and consumed; authority moves to incoming; revision becomes 2 |
+| Former operator tries guarded operation | `0xa5a97cef207998b80d8c4d0076f2c414894ecfb56604d4d644fade57322e8a9d` | No operation receipt created |
+| New operator performs guarded operation | `0x51145ece337234fc512a7c4d970c5d7871e2306a9153604a993d908de019343e` | Canonical receipt `9e7a088f…98713` recorded |
+| Controller attempts activation replay | `0x2c41d9ad2f04055550ee0ab6c2c2eefb671a98d0e0047ac6edd9fac9fd999505` | Revision remains 2; handover remains consumed and `ACTIVATED` |
+
+Final readback: active operator `0xeb57…81f8`, service revision `2`, verdict `READY`, status `ACTIVATED`, `incoming_accepted=true`, and `consumed=true`. This verifies the complete successful lifecycle as well as wrong-role, stale-authority, and replay failure paths.
