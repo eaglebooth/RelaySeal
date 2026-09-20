@@ -1,7 +1,6 @@
 import { createClient } from "genlayer-js";
-import { TransactionStatus } from "genlayer-js/types";
 import { GENLAYER_CHAIN, WALLET_NETWORK } from "./network";
-import { finalizedExecutionError } from "./transaction";
+import { agreedExecution } from "./transaction";
 
 type Provider = {
   request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
@@ -15,7 +14,7 @@ export type TrackedStatus = { phase: string; genlayerTxId?: string; evmTxHash?: 
 type RuntimeClient = {
   connect?: (networkName: "studionet") => Promise<unknown>;
   writeContract: (args: { address: `0x${string}`; functionName: string; args: unknown[]; value: bigint }) => Promise<string>;
-  waitForTransactionReceipt: (args: { hash: `0x${string}`; status: string }) => Promise<{ statusName?: string; txExecutionResultName?: string; txDataDecoded?: unknown }>;
+  getTransaction: (args: { hash: `0x${string}` }) => Promise<{ statusName?: string; data?: unknown; consensus_data?: { validators?: Array<{ vote?: string; execution_result?: string; genvm_result?: { stderr?: string } }> } }>;
 };
 export const contractAddress = () => process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "0x0000000000000000000000000000000000000000";
 export const configured = () => /^0x[0-9a-fA-F]{40}$/.test(contractAddress()) && !/^0x0{40}$/i.test(contractAddress());
@@ -67,11 +66,24 @@ export async function writeContract(method: string, args: unknown[], onUpdate: (
     if (runtime.connect) await runtime.connect("studionet");
     const hash = await runtime.writeContract({ address: contractAddress() as `0x${string}`, functionName: method, args, value: BigInt(0) });
     onUpdate({ phase: "submitted", genlayerTxId: hash });
-    const receipt = await runtime.waitForTransactionReceipt({ hash: hash as `0x${string}`, status: TransactionStatus.FINALIZED });
-    const finalizedError = finalizedExecutionError(receipt.txExecutionResultName);
-    if (finalizedError) return { success: false, hash, error: finalizedError };
+    let transaction: Awaited<ReturnType<RuntimeClient["getTransaction"]>> | undefined;
+    for (let attempt = 0; attempt < 300; attempt += 1) {
+      transaction = await runtime.getTransaction({ hash: hash as `0x${string}` });
+      const status = transaction.statusName || "PENDING";
+      onUpdate({ phase: status.toLowerCase(), genlayerTxId: hash });
+      if (["FINALIZED", "CANCELED", "UNDETERMINED"].includes(status)) break;
+      await new Promise((resolve) => setTimeout(resolve, 2500));
+    }
+    if (!transaction || transaction.statusName !== "FINALIZED") return { success: false, hash, error: "Tracking timed out; the transaction may still finalize. Verify it on the explorer before retrying." };
+    const execution = agreedExecution(transaction.consensus_data?.validators);
+    if (execution === "ERROR") {
+      const stderr = transaction.consensus_data?.validators?.find((validator) => validator.vote === "agree")?.genvm_result?.stderr || "";
+      const reason = stderr.match(/Exception: ([^\r\n]+)/)?.[1] || "Contract execution reverted.";
+      return { success: false, hash, error: reason };
+    }
+    if (execution !== "SUCCESS") return { success: false, hash, error: "Finalized, but validator execution metadata is unavailable. Verify the transaction on the explorer." };
     onUpdate({ phase: "finalized", genlayerTxId: hash });
-    return { success: true, hash, data: receipt.txDataDecoded };
+    return { success: true, hash, data: transaction.data };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Transaction tracking failed.";
     return { success: false, error: /timeout|timed out/i.test(message) ? `Tracking timed out; the transaction may still finalize. Verify it on the explorer before retrying. ${message}` : message };

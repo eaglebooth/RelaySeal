@@ -12,3 +12,4 @@ outcomes were declared before execution.
 | `handover-conflicted.md` | CONFLICTED |
 | `handover-unsafe.md` | UNSAFE |
 | `handover-prompt-injection.md` | INCOMPLETE |
+| `handover-v2-ready.md` | READY |

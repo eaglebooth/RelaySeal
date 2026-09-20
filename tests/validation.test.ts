@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { validateField, validateValues } from "../lib/validation.ts";
-import { finalizedExecutionError } from "../lib/transaction.ts";
+import { agreedExecution, finalizedExecutionError } from "../lib/transaction.ts";
 
 test("accepts canonical controller, repository and digest values", () => {
   assert.equal(validateField("controller", `0x${"a".repeat(40)}`), "");
@@ -32,4 +32,10 @@ test("does not misclassify a finalized receipt with omitted result metadata", ()
   assert.equal(finalizedExecutionError(undefined), "");
   assert.equal(finalizedExecutionError("FINISHED_WITH_RETURN"), "");
   assert.match(finalizedExecutionError("FINISHED_WITH_ERROR"), /without successful return/);
+});
+
+test("uses agreed GenVM validator execution as the final source of truth", () => {
+  assert.equal(agreedExecution([{ vote: "agree", execution_result: "SUCCESS" }]), "SUCCESS");
+  assert.equal(agreedExecution([{ vote: "idle", execution_result: "ERROR" }, { vote: "agree", execution_result: "ERROR" }]), "ERROR");
+  assert.equal(agreedExecution([]), "UNKNOWN");
 });

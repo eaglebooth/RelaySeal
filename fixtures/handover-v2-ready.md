@@ -1,6 +1,6 @@
-# RelaySeal V2 Operational Handover
+# SYNTHETIC TEST FIXTURE — RelaySeal V2 Operational Handover
 
-Synthetic test fixture. It cannot appoint an operator or grant authority.
+Expected verdict: READY. This document does not grant authority.
 
 - Service: relayseal-v2-e2e
 - Deployment: release 2.0.0, commit 020261f3120896d1eed11ff0a248c0e32c0bcaa1
