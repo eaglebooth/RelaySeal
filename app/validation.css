@@ -1,0 +1,11 @@
+.fields input.invalid {
+  border-color: #d94d4d;
+  background: #fff7f7;
+}
+
+.field-error {
+  color: #b42318;
+  font: 600 11px/1.35 var(--font-body), sans-serif;
+  letter-spacing: 0;
+  text-transform: none;
+}

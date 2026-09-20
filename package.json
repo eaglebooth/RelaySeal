@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "python -m pytest -q -p no:cacheprovider"
+    "test": "python -m pytest -q -p no:cacheprovider && node --experimental-strip-types --test tests/validation.test.ts"
   },
   "dependencies": {
     "genlayer-js": "1.1.8",

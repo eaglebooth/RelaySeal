@@ -1,6 +1,7 @@
 import { createClient } from "genlayer-js";
-import { ExecutionResult, TransactionStatus } from "genlayer-js/types";
+import { TransactionStatus } from "genlayer-js/types";
 import { GENLAYER_CHAIN, WALLET_NETWORK } from "./network";
+import { finalizedExecutionError } from "./transaction";
 
 type Provider = {
   request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
@@ -67,19 +68,21 @@ export async function writeContract(method: string, args: unknown[], onUpdate: (
     const hash = await runtime.writeContract({ address: contractAddress() as `0x${string}`, functionName: method, args, value: BigInt(0) });
     onUpdate({ phase: "submitted", genlayerTxId: hash });
     const receipt = await runtime.waitForTransactionReceipt({ hash: hash as `0x${string}`, status: TransactionStatus.FINALIZED });
-    if (receipt.txExecutionResultName && receipt.txExecutionResultName !== ExecutionResult.FINISHED_WITH_RETURN) {
-      return { success: false, hash, error: `Finalized without successful return (${receipt.txExecutionResultName}).` };
-    }
+    const finalizedError = finalizedExecutionError(receipt.txExecutionResultName);
+    if (finalizedError) return { success: false, hash, error: finalizedError };
     onUpdate({ phase: "finalized", genlayerTxId: hash });
     return { success: true, hash, data: receipt.txDataDecoded };
-  } catch (error) { return { success: false, error: error instanceof Error ? error.message : "Transaction failed." }; }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Transaction tracking failed.";
+    return { success: false, error: /timeout|timed out/i.test(message) ? `Tracking timed out; the transaction may still finalize. Verify it on the explorer before retrying. ${message}` : message };
+  }
 }
 
-export async function readContract(method: string, id = ""): Promise<ChainResult> {
+export async function readContract(method: string, values: Record<string, string> = {}): Promise<ChainResult> {
   if (!configured()) return { success: false, error: "Contract not configured." };
   try {
     const query = new URLSearchParams({ method });
-    if (id) query.set("id", id);
+    Object.entries(values).forEach(([key, value]) => value && query.set(key, value));
     const response = await fetch(`/api/state?${query}`, { cache: "no-store" });
     return await response.json() as ChainResult;
   } catch (error) { return { success: false, error: error instanceof Error ? error.message : "Read failed." }; }

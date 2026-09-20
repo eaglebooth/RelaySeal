@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./validation.css";
 
 export const metadata: Metadata = {
   title: "RelaySeal — Authority-bound handovers",
