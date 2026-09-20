@@ -2,7 +2,7 @@
 
 RelaySeal is a GenLayer intelligent contract for transferring operational authority only after two separately authorized operators commit independent evidence, consensus compares both sources, the incoming operator acknowledges the exact digest, and the service controller activates the transfer.
 
-Historical V1 frontend: [relayseal.vercel.app](https://relayseal.vercel.app) · historical V1 Studionet contract: `0x34e20DaAfcb0737DC34c70267B5bb06AE7BC1F31`. V2 is code-complete and awaiting a new owner deployment; do not treat V1 transactions as V2 evidence.
+Live frontend: [relayseal.vercel.app](https://relayseal.vercel.app) · V2 Studionet contract: [`0xd38b5409C69Ec4e4D65FDE42A1776daDCE2Ac1C1`](https://explorer-studio.genlayer.com/address/0xd38b5409C69Ec4e4D65FDE42A1776daDCE2Ac1C1). Historical V1 transactions remain documented separately and are not presented as V2 evidence.
 
 The core rule is simple: **evidence informs; on-chain policy authorizes**. A Markdown file can describe deployments, incidents, risks and rollback steps, but it can never appoint an operator or grant execution rights.
 
@@ -46,8 +46,8 @@ npm run build
 python -m pytest -q
 ```
 
-See [`docs/STEWARD_REMEDIATION_V2.md`](./docs/STEWARD_REMEDIATION_V2.md) for the review-fix mapping. The [live Studionet evidence](./docs/LIVE_STUDIONET_EVIDENCE.md) is explicitly the historical V1 record.
+See [`docs/STEWARD_REMEDIATION_V2.md`](./docs/STEWARD_REMEDIATION_V2.md) for the review-fix mapping and [`docs/LIVE_STUDIONET_EVIDENCE_V2.md`](./docs/LIVE_STUDIONET_EVIDENCE_V2.md) for the verified V2 deployment/readback. The original [live Studionet evidence](./docs/LIVE_STUDIONET_EVIDENCE.md) is explicitly the historical V1 record.
 
 ## Status
 
-V2 passes local behavioral contract tests, lint and production build. A new Studio Next deployment, frontend address update and fresh V2 lifecycle evidence are still required before resubmission. The prior V1 deployment remains available only as historical evidence.
+V2 is deployed and its on-chain `get_contract_version` readback confirms schema `authority-bound-handover-v2`, version 2. Local behavioral contract tests, frontend tests, lint and production build pass. Fresh V2 lifecycle transaction evidence is still required before resubmission; the prior V1 deployment remains historical only.

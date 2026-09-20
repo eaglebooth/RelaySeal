@@ -1,6 +1,6 @@
 # RelaySeal V2 steward remediation
 
-Status: code-complete locally; live V2 deployment and transaction evidence pending.
+Status: code-complete and deployed at `0xd38b5409C69Ec4e4D65FDE42A1776daDCE2Ac1C1`; live V2 lifecycle evidence pending.
 
 ## Changes mapped to the review
 
@@ -23,4 +23,4 @@ npm run build
 
 ## Required live follow-up
 
-Deploy `contracts/relayseal.py` as a new Studio Next contract, configure the new address, then rerun happy path, rejection path, namespace collision, malformed input and replay cases. Record each finalized transaction and canonical readback in a new `LIVE_STUDIONET_EVIDENCE_V2.md` file.
+Configure the deployed V2 address, then rerun happy path, rejection path, namespace collision, malformed input and replay cases. Record each finalized transaction and canonical readback in a new `LIVE_STUDIONET_EVIDENCE_V2.md` file.
